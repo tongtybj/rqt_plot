@@ -96,6 +96,7 @@ class ROSData(object):
     def __init__(self, topic, start_time):
         self.name = topic
         self.start_time = start_time
+        self.start_time_flag = True
         self.error = None
 
         self.lock = threading.Lock()
@@ -109,6 +110,8 @@ class ROSData(object):
             self.sub = rospy.Subscriber(real_topic, data_class, self._ros_cb)
         else:
             self.error = RosPlotException("Can not resolve topic type of %s" % topic)
+
+
 
     def close(self):
         self.sub.unregister()
@@ -124,8 +127,18 @@ class ROSData(object):
                 self.buff_y.append(self._get_data(msg))
                 # #944: use message header time if present
                 if msg.__class__._has_header:
+                    if self.start_time_flag:
+                        self.start_time = msg.header.stamp.to_sec()
+                        self.start_time_flag = False
                     self.buff_x.append(msg.header.stamp.to_sec() - self.start_time)
+                    if self.start_time_flag:
+                        self.start_time = msg.header.stamp.to_sec()
+                        self.start_time_flag = False
+                        self.buff_x.append(msg.header.stamp.to_sec() - self.start_time)
                 else:
+                    if self.start_time_flag:
+                        self.start_time = rospy.get_time()
+                        self.start_time_flag = False
                     self.buff_x.append(rospy.get_time() - self.start_time)
                 #self.axes[index].plot(datax, buff_y)
             except AttributeError as e:

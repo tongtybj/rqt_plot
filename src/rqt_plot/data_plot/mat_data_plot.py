@@ -151,7 +151,7 @@ class MatDataPlot(QWidget):
         if handles:
             hl = sorted(zip(handles, labels), key=operator.itemgetter(1))
             handles, labels = zip(*hl)
-        self._canvas.axes.legend(handles, labels, loc='upper left')
+        #self._canvas.axes.legend(handles, labels, loc='upper left')
 
     def set_values(self, curve, data_x, data_y):
         line = self._curves[curve]
